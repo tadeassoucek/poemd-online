@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>PoeMD Online</title>
+  <meta charset="utf-8">
+
+  <script src="js/bundle.js" defer></script>
+
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/poem.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400;1,700&family=Source+Code+Pro:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <main>
+    <section id="input-section" class="resizable-w">
+      <section id="control-buttons">
+        <button id="compile-button">Compile</button>
+      </section>
+      <textarea id="input"></textarea>
+    </section>
+
+    <section id="output-section" class="resizable-e">
+      <section id="output-tabs">
+        <button id="show-html-button" class="tab toggled">HTML</button>
+        <button id="show-latex-button" class="tab">LaTeX</button>
+      </section>
+
+      <section id="html-output-section">
+        <section id="html-output-tabs">
+          <button id="show-normal-button" class="tab toggled">Normal</button>
+          <button id="show-raw-button" class="tab">Raw</button>
+        </section>
+
+        <section id="html-output"></section>
+
+        <section id="html-output-raw-section" class="hidden">
+          <textarea id="html-output-raw" readonly></textarea>
+        </section>
+      </section>
+
+      <section id="latex-output-section" class="hidden">
+        <form action="https://www.overleaf.com/docs" method="post" target="_blank">
+          <textarea name="snip" id="latex-output-raw" readonly></textarea>
+          <input type="submit" value="View in Overleaf">
+        </form>
+      </section>
+    </section>
+  </main>
+</body>
+
+</html>

@@ -1,0 +1,38 @@
+/* This file contains styles for the HTML poem representation. */
+
+.versephantom {
+  color: transparent;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+
+.verseindent {
+  margin-right: 3em;
+}
+
+#html-output {
+  font-family: 'Merriweather', serif;
+  font-size: 10pt;
+  line-height: 1.6em;
+  padding: 0px 20px;
+}
+
+h1 {
+  font-size: 2.3em;
+  font-weight: bold;
+  margin: 26px 0px;
+}
+
+header > span {
+  display: block;
+  margin-left: 2em;
+}
+
+.subtitle::before {
+  content: "\2014\00a0"
+}
+
+.author {
+  font-style: italic;
+}

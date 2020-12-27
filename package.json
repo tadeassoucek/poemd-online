@@ -1,0 +1,14 @@
+{
+  "name": "poemd-online",
+  "version": "0.1.0",
+  "description": "",
+  "keywords": [],
+  "author": "Tadeas Soucek",
+  "license": "MIT",
+  "scripts": {
+    "start": "browserify js/script.js -o js/bundle.js"
+  },
+  "dependencies": {
+    "poemd-parser": "0.1.0-1"
+  }
+}
