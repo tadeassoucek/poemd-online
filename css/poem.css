@@ -1,5 +1,17 @@
 /* This file contains styles for the HTML poem representation. */
 
+.poemsubtitle, .poemauthor, h2 {
+  margin-left: 7rem;
+}
+
+.poemsubtitle { margin-bottom: 1em }
+
+.poemauthor { font-style: italic }
+
+.poemdate { margin-top: 4em }
+
+.verseindent { margin-right: 2em }
+
 .versephantom {
   color: transparent;
   user-select: none;
@@ -7,32 +19,24 @@
   -webkit-user-select: none;
 }
 
-.verseindent {
-  margin-right: 3em;
-}
-
 #html-output {
-  font-family: 'Merriweather', serif;
-  font-size: 10pt;
-  line-height: 1.6em;
+  font-family: 'Computer Modern Serif', serif;
+  font-size: 11pt;
   padding: 0px 20px;
 }
 
 h1 {
-  font-size: 2.3em;
-  font-weight: bold;
+  font-size: 2em;
+  font-weight: normal;
   margin: 26px 0px;
+}
+
+h2 {
+  font-size: 1.5em;
+  font-weight: normal;
 }
 
 header > span {
   display: block;
   margin-left: 2em;
-}
-
-.subtitle::before {
-  content: "\2014\00a0"
-}
-
-.author {
-  font-style: italic;
 }

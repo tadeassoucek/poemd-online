@@ -14,18 +14,16 @@ function compile() {
   const res = poemd.parse(code)
   $('#html-output-raw').value = $('#html-output').innerHTML = res.document.toHTML()
   $('#latex-output-raw').value = res.document.toLatex()
+  for (const msg of res.messages)
+    console.log(msg.toString())
 }
 
-$('#compile-button').onclick = compile
-
 $('#input').onkeyup = function() {
-  if (!lastCompilation || Date.now() - lastCompilation > 500)
+  if (Date.now() - (lastCompilation || 0) > 150)
     compile()
 }
 
-$('#input').onchange = function() {
-  compile()
-}
+$('#input').onchange = $('#compile-button').onclick = window.onload = compile
 
 const panel = $('.resizable-w')
 

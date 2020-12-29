@@ -1,14 +1,17 @@
 {
   "name": "poemd-online",
   "version": "0.1.0",
-  "description": "",
-  "keywords": [],
+  "description": "A website to test out PoeMD.",
   "author": "Tadeas Soucek",
   "license": "MIT",
   "scripts": {
     "start": "browserify js/script.js -o js/bundle.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tadeassoucek/poemd-online.git"
+  },
   "dependencies": {
-    "poemd-parser": "0.1.0-1"
+    "poemd-parser": "0.1.1"
   }
 }

@@ -15,18 +15,16 @@ function compile() {
   const res = poemd.parse(code)
   $('#html-output-raw').value = $('#html-output').innerHTML = res.document.toHTML()
   $('#latex-output-raw').value = res.document.toLatex()
+  for (const msg of res.messages)
+    console.log(msg.toString())
 }
 
-$('#compile-button').onclick = compile
-
 $('#input').onkeyup = function() {
-  if (!lastCompilation || Date.now() - lastCompilation > 500)
+  if (Date.now() - (lastCompilation || 0) > 150)
     compile()
 }
 
-$('#input').onchange = function() {
-  compile()
-}
+$('#input').onchange = $('#compile-button').onclick = window.onload = compile
 
 const panel = $('.resizable-w')
 
@@ -84,7 +82,7 @@ exports.CONFIGURATION = {
     defaults: {
         language: 'english',
         fontSize: 11,
-        paper: 'a5'
+        paper: 'a4'
     }
 };
 
@@ -324,14 +322,14 @@ function parse(code) {
                         if (!lastStanza.content.length && utils_1.getLast(poem.content, 1)) {
                             var lastStanza_1 = utils_1.getLast(poem.content, 1);
                             if (lastStanza_1 instanceof poem_1.SectionTitle)
-                                verse.breakWith = lastStanza_1;
+                                verse["break"](lastStanza_1);
                             else
-                                verse.breakWith = utils_1.getLast(lastStanza_1.content);
+                                verse["break"](utils_1.getLast(lastStanza_1.content));
                         }
                         else {
                             var breakWith = utils_1.getLast(lastStanza.content);
                             if (breakWith instanceof poem_1.Verse)
-                                verse.breakWith = breakWith;
+                                verse["break"](breakWith);
                         }
                         breakVerse = false;
                     }
@@ -384,20 +382,17 @@ exports.__esModule = true;
 exports.Document = exports.Poem = exports.SectionTitle = exports.Stanza = exports.Verse = void 0;
 var utils_1 = require("./utils");
 var config_1 = require("./config");
-var htmlStyle = '<style>\n' +
-    config_1.CONFIGURATION.indentation + 'header span {\n' +
-    utils_1.repeat(config_1.CONFIGURATION.indentation, 2) + 'display: block;\n' +
-    config_1.CONFIGURATION.indentation + '}\n' +
-    config_1.CONFIGURATION.indentation + '.author, .date {\n' +
-    utils_1.repeat(config_1.CONFIGURATION.indentation, 2) + 'margin-left: 3em;\n' +
-    utils_1.repeat(config_1.CONFIGURATION.indentation, 2) + 'font-style: italic\n' +
-    config_1.CONFIGURATION.indentation + '}\n' +
-    config_1.CONFIGURATION.indentation + ".subtitle::before { content: '\\2014\\00a0' }\n" +
-    config_1.CONFIGURATION.indentation + ".author::before { content: 'by ' }\n" +
-    config_1.CONFIGURATION.indentation + ".date::before { content: 'on ' }\n" +
-    config_1.CONFIGURATION.indentation + '.versephantom { color: transparent; user-select: none }\n' +
-    config_1.CONFIGURATION.indentation + '.verseindent { margin-right: 2em }\n' +
-    '</style>\n\n';
+var htmlStyle = '<style>\n' + utils_1.indent('.poemsubtitle, .poemauthor {\n' +
+    utils_1.indent('margin-left: 3em;') + '\n}\n' +
+    '.poemsubtitle { margin-bottom: 1em }\n' +
+    '.poemauthor { font-style: italic }\n' +
+    '.poemdate { margin-top: 4em }\n' +
+    '.verseindent { margin-right: 2em }\n' +
+    '.versephantom {\n' +
+    utils_1.indent('color: transparent;\n' +
+        'user-select: none;\n' +
+        '-moz-user-select: none;\n' +
+        '-webkit-user-select: none;') + '\n}') + '\n</style>\n\n';
 var Verse = /** @class */ (function () {
     function Verse(content, indentLevel, breakWith) {
         this.isBroken = false;
@@ -405,7 +400,13 @@ var Verse = /** @class */ (function () {
         this.content = content;
         this.indentLevel = indentLevel;
         this.breakWith = breakWith;
+        this.isBroken = !!breakWith;
     }
+    Verse.prototype["break"] = function (v) {
+        this.breakWith = v;
+        if (v instanceof Verse)
+            v.isBroken = true;
+    };
     Verse.prototype.clean = function () {
         this.content = utils_1.cleanString(this.content);
     };
@@ -453,11 +454,11 @@ var Stanza = /** @class */ (function () {
     };
     Stanza.prototype.toHTML = function () {
         var _this = this;
-        return config_1.CONFIGURATION.indentation + "<p class=\"stanza\">\n" + this.content.map(function (v, i) { return utils_1.repeat(config_1.CONFIGURATION.indentation, 2) + v.toHTML(i == _this.content.length - 1); }).join('') + "\n" + config_1.CONFIGURATION.indentation + "</p>";
+        return utils_1.indent("<p class=\"stanza\">\n" + this.content.map(function (v, i) { return config_1.CONFIGURATION.indentation + v.toHTML(i == _this.content.length - 1); }).join('') + "\n</p>");
     };
     Stanza.prototype.toLatex = function () {
         var _this = this;
-        return config_1.CONFIGURATION.indentation + "\\begin{stanza}\n" + this.content.map(function (v, i) { return utils_1.repeat(config_1.CONFIGURATION.indentation, 2) + v.toLatex(i == _this.content.length - 1); }).join('') + "\n" + config_1.CONFIGURATION.indentation + "\\end{stanza}";
+        return utils_1.indent("\\begin{stanza}\n" + this.content.map(function (v, i) { return config_1.CONFIGURATION.indentation + v.toLatex(i == _this.content.length - 1); }).join('') + "\n\\end{stanza}");
     };
     return Stanza;
 }());
@@ -512,41 +513,45 @@ var Poem = /** @class */ (function () {
     };
     Poem.prototype.toHTML = function (selfContained) {
         if (selfContained === void 0) { selfContained = false; }
-        var s = '';
+        var s = '<div class="poem">\n';
         if (selfContained)
             s += htmlStyle;
         if (this.title) {
-            s += '<header>\n' +
-                config_1.CONFIGURATION.indentation + '<h1>' + utils_1.renderMD(utils_1.escapeHTML(this.title), 'html') + '</h1>\n';
+            var header = '<header>\n' + utils_1.indent('<h1>' + utils_1.renderMD(utils_1.escapeHTML(this.title), 'html') + '</h1>') + '\n';
             if (this.subtitle)
-                s += config_1.CONFIGURATION.indentation + '<span class="subtitle">' + utils_1.renderMD(utils_1.escapeHTML(this.subtitle), 'html') +
-                    '</span>\n';
+                header += utils_1.indent('<div class="poemsubtitle">' + utils_1.renderMD(utils_1.escapeHTML(this.subtitle), 'html') + '</div>') + '\n';
             if (this.author)
-                s += config_1.CONFIGURATION.indentation + '<span class="author">' + utils_1.renderMD(utils_1.escapeHTML(this.author), 'html') +
-                    '</span>\n';
-            if (this.date) {
-                var date = this.date;
-                if (date == 'auto')
-                    date = utils_1.getLatexDate();
-                s += config_1.CONFIGURATION.indentation + '<span class="date">' + utils_1.renderMD(utils_1.escapeHTML(date), 'html') +
-                    '</span>\n';
-            }
-            s += '</header>\n\n';
+                header += utils_1.indent('<div class="poemauthor">' + utils_1.renderMD(utils_1.escapeHTML(this.author), 'html') + '</div>') + '\n';
+            header += '</header>';
+            s += utils_1.indent(header) + '\n\n';
         }
-        s += "<div class=\"poem\">\n" + utils_1.renderMD(this.content.map(function (s) { return s.toHTML(); }).join('\n'), 'html') + "\n</div>";
+        s += utils_1.renderMD(this.content.map(function (s) { return s.toHTML(); }).join('\n'), 'html');
+        if (this.date) {
+            var date = this.date;
+            if (date == 'auto')
+                date = utils_1.getLatexDate();
+            s += '\n\n' + utils_1.indent('<footer>\n' +
+                utils_1.indent('<div class="poemdate">' + utils_1.renderMD(utils_1.escapeHTML(date), 'html') + '</div>') +
+                '\n</footer>') + '\n';
+        }
+        s += '\n</div>';
         return s;
     };
     Poem.prototype.toLatex = function () {
         var s = '\\begin{poem}\n';
         if (this.title)
-            s += "\\poemtitle{" + utils_1.renderMD(utils_1.escapeLatex(this.title), 'latex') + "}\n";
+            s += utils_1.indent("\\poemtitle{" + utils_1.renderMD(utils_1.escapeLatex(this.title), 'latex') + "}") + '\n';
         if (this.subtitle)
-            s += "\\poemsubtitle{" + utils_1.renderMD(utils_1.escapeLatex(this.subtitle), 'latex') + "}\n";
-        s += "\n" + utils_1.renderMD(this.content.map(function (s) { return s.toLatex(); }).join('\n\n'), 'latex') + "\n\n\\end{poem}";
+            s += utils_1.indent("\\poemsubtitle{" + utils_1.renderMD(utils_1.escapeLatex(this.subtitle), 'latex') + "}") + '\n';
         if (this.author)
-            s += "\\attribution{" + utils_1.renderMD(utils_1.escapeLatex(this.author), 'latex') + "}\n";
-        if (this.date)
-            s += "\\poemdate{" + utils_1.renderMD(utils_1.escapeLatex(this.date), 'latex') + "}";
+            s += utils_1.indent("\\attribution{" + utils_1.renderMD(utils_1.escapeLatex(this.author), 'latex') + "}") + '\n';
+        s += "\n" + utils_1.renderMD(this.content.map(function (s) { return s.toLatex(); }).join('\n\n'), 'latex') + "\n\n\\end{poem}";
+        if (this.date) {
+            var date = this.date;
+            if (date == 'auto')
+                date = utils_1.getLatexDate();
+            s += "\n\\poemdate{" + utils_1.renderMD(utils_1.escapeLatex(date), 'latex') + "}";
+        }
         return s;
     };
     return Poem;
@@ -568,6 +573,34 @@ var Document = /** @class */ (function () {
         var options = ['twoside', this.paper.toLowerCase() + 'paper', this.fontSize + 'pt'];
         return "\\documentclass[" + options.join(',') + "]{article}";
     };
+    Document.prototype.getLanguages = function () {
+        var langs = [];
+        this.poems.forEach(function (p) {
+            if (langs.indexOf(p.language) != -1)
+                langs.push(p.language);
+        });
+        return langs.length ? langs.join(',') : config_1.CONFIGURATION.defaults.language;
+    };
+    Document.prototype.indentUsed = function () {
+        var res = false;
+        try {
+            this.poems.forEach(function (p) {
+                return p.content.forEach(function (s) {
+                    return s instanceof Stanza && s.content.forEach(function (v) {
+                        if (v.indentLevel) {
+                            res = true;
+                            throw null;
+                        }
+                    });
+                });
+            });
+        }
+        catch (e) {
+            if (e)
+                throw e;
+        }
+        return res;
+    };
     Document.prototype.toHTML = function (selfContained) {
         if (selfContained === void 0) { selfContained = false; }
         var s = '<!DOCTYPE html>\n\n' +
@@ -582,12 +615,12 @@ var Document = /** @class */ (function () {
     Document.prototype.toLatex = function () {
         var s = this.getLatexClass() + '\n\n' +
             '\\usepackage[utf8]{inputenc}\n' +
-            // `\\usepackage[${this.language}]{babel}\n` +
+            ("\\usepackage[" + this.getLanguages() + "]{babel}\n") +
+            '\\usepackage[pass]{geometry}\n' +
             '\\usepackage{ulem}\n' +
             '\\usepackage{fancyhdr}\n' +
             '\\usepackage{poemscol}\n' +
-            '\\usepackage{ifthen}\n' +
-            '\\usepackage[pass]{geometry}\n\n';
+            (this.indentUsed() ? '\\usepackage{ifthen}\n' : '') + '\n';
         s += '\\normalem\n' +
             '\\normaltitleindentationscheme\n\n' +
             '\\begin{document}\n\n';
@@ -628,7 +661,8 @@ var TokenType;
 },{}],8:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
-exports.renderMD = exports.escapeHTML = exports.escapeLatex = exports.cleanString = exports.getLatexDate = exports.formatString = exports.getValues = exports.getKeys = exports.repeat = exports.getLast = exports.oneOf = void 0;
+exports.indent = exports.renderMD = exports.escapeHTML = exports.escapeLatex = exports.cleanString = exports.getLatexDate = exports.formatString = exports.getValues = exports.getKeys = exports.repeat = exports.getLast = exports.oneOf = void 0;
+var config_1 = require("./config");
 function oneOf(orig) {
     var vals = [];
     for (var _i = 1; _i < arguments.length; _i++) {
@@ -708,12 +742,12 @@ function escapeHTML(s) {
         .replace(/</g, '&iexcl;')
         .replace(/>/g, '&iquest;')
         .replace(/&/g, '&amp;')
-        .replace(/\\~/g, '&nbsp;')
         .replace(/\.\.\./g, '&hellip;')
         .replace(/---/g, '&mdash;')
         .replace(/--/g, '&ndash;')
         .replace(/``/g, '&ldquo;')
         .replace(/''/g, '&rdquo;')
+        .replace(/"/g, '&rdquo;')
         .replace(/,,/g, '&bdquo;')
         .replace(/`/g, '&lsquo;')
         .replace(/'/g, '&rsquo;');
@@ -729,10 +763,15 @@ function renderMD(s, lang) {
         s = s
             .replace(/_/g, '\\_')
             .replace(/~/g, '\\texttilde ')
-            .replace(/\\textbackslash \\texttilde/g, '~')
             .replace(/\\texttilde  /g, '\\texttilde\\ ');
     return s;
 }
 exports.renderMD = renderMD;
+function indent(s, count) {
+    if (count === void 0) { count = 1; }
+    return (s !== null && s !== void 0 ? s : '')
+        .replace(/^/gm, repeat(config_1.CONFIGURATION.indentation, count));
+}
+exports.indent = indent;
 
-},{}]},{},[1]);
+},{"./config":2}]},{},[1]);

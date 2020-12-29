@@ -7,6 +7,10 @@ button {
   padding: 5px;
 }
 
+button, input[type=submit] {
+  cursor: pointer;
+}
+
 .tab {
   background-color: transparent;
   border: 5px solid transparent;
@@ -18,7 +22,7 @@ button {
   border-bottom: 5px solid #78CAD2;
 }
 
-button:hover {
+.tab:hover {
   border-bottom-color: #65acb3;
 }
 
@@ -31,6 +35,20 @@ button:hover {
 }
 
 textarea {
-  font-family: 'Source Code Pro', monospace;
+  font-family: 'Monaco', 'Monego', 'Source Code Pro', monospace;
   font-size: 10pt;
+}
+
+#open-in-overleaf {
+  color: white;
+  background-color: #138a07;
+  line-height: 1.3em;
+  font-weight: bold;
+  padding: 5px;
+  border: none;
+  border-radius: 9999px;
+}
+
+#open-in-overleaf:hover {
+  background-color: #0e6305;
 }

@@ -12,8 +12,7 @@
   <link rel="stylesheet" href="css/poem.css">
   <link rel="stylesheet" href="css/style.css">
 
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400;1,700&family=Source+Code+Pro:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.rawgit.com/dreampulse/computer-modern-web-font/master/fonts.css">
 </head>
 
 <body>
@@ -34,7 +33,7 @@
       <section id="html-output-section">
         <section id="html-output-tabs">
           <button id="show-normal-button" class="tab toggled">Normal</button>
-          <button id="show-raw-button" class="tab">Raw</button>
+          <button id="show-raw-button" class="tab">Code</button>
         </section>
 
         <section id="html-output"></section>
@@ -47,7 +46,7 @@
       <section id="latex-output-section" class="hidden">
         <form action="https://www.overleaf.com/docs" method="post" target="_blank">
           <textarea name="snip" id="latex-output-raw" readonly></textarea>
-          <input type="submit" value="View in Overleaf">
+          <input id="open-in-overleaf" type="submit" value="Open in Overleaf">
         </form>
       </section>
     </section>
